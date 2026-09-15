@@ -9,10 +9,12 @@ import { Label } from '@/components/ui/label'
 import { createRoomId } from '../utils/create-room-id'
 import { createHost } from '../utils/create-host'
 import { toast } from 'react-toastify'
+import { useSettingsStore } from '@/store/store'
 
 export const App = () => {
 	const [roomInput, setRoomInput] = useState<string | null>()
 	const navigate = useNavigate()
+	const { name, setName } = useSettingsStore()
 
 	function openRoom() {
 		const roomId = createRoomId()
@@ -42,9 +44,21 @@ export const App = () => {
 				<Card className='w-full items-start gap-6 p-7'>
 					<div className='flex flex-col gap-1'>
 						<span className='text-xs font-medium tracking-widest text-muted-foreground uppercase'>
-							Voice Rooms
+							Roma
 						</span>
 						<CardTitle className='text-2xl'>Войти в комнату</CardTitle>
+					</div>
+
+					<div className='flex w-full flex-col gap-2'>
+						<Label htmlFor='username'>Имя пользователя</Label>
+						<Input
+							id='username'
+							defaultValue={name}
+							placeholder='Romario'
+							onChange={(e) => setName(e.target.value)}
+							className='h-10 w-full font-mono text-base tracking-wide'
+							type='text'
+						/>
 					</div>
 
 					<div className='flex w-full flex-col gap-2'>

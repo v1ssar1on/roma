@@ -20,23 +20,29 @@ export const Room = () => {
 		setOutputMuted((prev) => !prev)
 	}
 
+	console.log(peerId)
+
 	const participantIds = [peerId, ...Object.keys(remoteStreams)].filter(
 		(id): id is string => Boolean(id),
 	)
 
 	return (
 		<div className='flex h-svh flex-col bg-background p-4'>
-			<header className='flex items-center justify-between'>
+			<header className='flex items-center justify-between relative'>
 				<Button variant='ghost' size='icon' onClick={() => navigate('/')}>
 					<ArrowLeft className='size-4' />
 				</Button>
-				<div className='flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5'>
+
+				<div className='flex absolute left-1/2 transform-[translateX(-50%)] items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5'>
 					<span className='size-1.5 rounded-full bg-emerald-400' />
 					<span className='font-mono text-xs text-muted-foreground'>
 						{roomId}
 					</span>
 				</div>
-				<div className='w-9' />
+
+				<span className='font-mono text-xs text-muted-foreground'>
+					Количество участников: {participantIds.length}
+				</span>
 			</header>
 
 			<div className='flex flex-1 items-center justify-center'>
