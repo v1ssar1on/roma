@@ -77,7 +77,7 @@ export const App = () => {
 					</div>
 
 					<div className='flex w-full flex-col gap-2'>
-						<Button onClick={handleGoRoom} className='w-full justify-between'>
+						<Button onClick={handleGoRoom} className='w-full justify-center'>
 							Присоединиться
 							<ArrowRight className='size-4' />
 						</Button>
