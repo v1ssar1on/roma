@@ -2,19 +2,18 @@ services:
   backend:
     build: ./backend
     restart: unless-stopped
-    ports:
-      - '1337:3000'
+    expose:
+      - '1337'
 
   frontend:
     build:
       context: ./frontend
       args:
-        # the client's fallback in src/api/socket.ts assumes backend on port 3000 of the
-        # same host, which no longer holds now that backend is published on 1337 - so this
-        # has to be set explicitly. override with your real domain for an actual prod deploy
-        VITE_WS_URL: ${VITE_WS_URL:-http://localhost:1337}
+        # baked in at build time - point it at the public URL Dokploy assigns
+        # the backend service (its Domain, e.g. https://ws.yourdomain.com)
+        VITE_WS_URL: ${VITE_WS_URL}
     restart: unless-stopped
-    ports:
-      - '7331:80'
+    expose:
+      - '7331'
     depends_on:
       - backend

@@ -15,5 +15,6 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
 
-EXPOSE 3000
+ENV PORT=1337
+EXPOSE 1337
 CMD ["node", "dist/main"]
