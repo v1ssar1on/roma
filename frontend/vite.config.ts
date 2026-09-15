@@ -17,6 +17,7 @@ export default defineConfig({
 		},
 	},
 	server: {
-		allowedHosts: ['.trycloudflare.com'],
+		open: true,
+		port: 5173,
 	},
 })
