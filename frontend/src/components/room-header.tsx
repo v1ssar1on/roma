@@ -2,6 +2,7 @@ import { Button } from '@/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { CloseRoomAlert } from './close-room-alert'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/tooltip'
 
 export const RoomHeader = ({
 	roomId,
@@ -14,14 +15,19 @@ export const RoomHeader = ({
 
 	return (
 		<header className='flex items-center justify-between relative'>
-			<CloseRoomAlert
-				trigger={
-					<Button variant='ghost' size='xl'>
-						<ArrowLeft className='size-4' />
-					</Button>
-				}
-				onConfirm={() => navigate('/')}
-			/>
+			<Tooltip>
+				<TooltipTrigger>
+					<CloseRoomAlert
+						trigger={
+							<Button variant='ghost' size='xl'>
+								<ArrowLeft className='size-4' />
+							</Button>
+						}
+						onConfirm={() => navigate('/')}
+					/>
+				</TooltipTrigger>
+				<TooltipContent>Вернуться на главную</TooltipContent>
+			</Tooltip>
 
 			<div className='flex absolute left-1/2 transform-[translateX(-50%)] items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5'>
 				<span className='size-1.5 rounded-full bg-emerald-400' />
