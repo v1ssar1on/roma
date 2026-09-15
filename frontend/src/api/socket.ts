@@ -8,4 +8,4 @@ export const ICE_SERVERS: RTCConfiguration = {
 	iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
 }
 
-export const socket = io(WS_URL)
+export const socket = io(WS_URL, { autoConnect: false })

@@ -6,6 +6,7 @@ import type {
 	SignalPayload,
 } from '../types/types'
 import { ICE_SERVERS, socket } from '../api/socket'
+import { useSettingsStore } from '@/store/store'
 
 function isDescription(
 	data: SignalPayload['data'],
@@ -22,6 +23,7 @@ export const useRoomConnection = (
 		Record<string, MediaStream>
 	>({})
 	const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map())
+	const { name } = useSettingsStore()
 
 	useEffect(() => {
 		if (!roomId || !localStream) return
@@ -37,9 +39,15 @@ export const useRoomConnection = (
 
 			peerConnection.onicecandidate = (event) => {
 				if (!event.candidate) return
+
+				const candidateWithName = {
+					...event.candidate.toJSON(),
+					username: name,
+				}
+
 				socket.emit('signal', {
 					to: remotePeerId,
-					data: event.candidate.toJSON(),
+					data: candidateWithName,
 				})
 			}
 
@@ -64,29 +72,29 @@ export const useRoomConnection = (
 			})
 		}
 
-		socket.on('connect', () => {
+		function handleConnect() {
 			socket.emit('join-room', { roomId })
-		})
+		}
 
-		socket.on(
-			'room-joined',
-			async ({ peerId: ownId, peers }: RoomJoinedPayload) => {
-				setPeerId(ownId)
+		async function handleRoomJoined({
+			peerId: ownId,
+			peers,
+		}: RoomJoinedPayload) {
+			setPeerId(ownId)
 
-				for (const remotePeerId of peers) {
-					const peerConnection = createPeerConnection(remotePeerId)
-					const offer = await peerConnection.createOffer()
-					await peerConnection.setLocalDescription(offer)
-					socket.emit('signal', { to: remotePeerId, data: offer })
-				}
-			},
-		)
+			for (const remotePeerId of peers) {
+				const peerConnection = createPeerConnection(remotePeerId)
+				const offer = await peerConnection.createOffer()
+				await peerConnection.setLocalDescription(offer)
+				socket.emit('signal', { to: remotePeerId, data: offer })
+			}
+		}
 
-		socket.on('peer-left', ({ peerId: remotePeerId }: PeerLeftPayload) => {
+		function handlePeerLeft({ peerId: remotePeerId }: PeerLeftPayload) {
 			removePeer(remotePeerId)
-		})
+		}
 
-		socket.on('signal', async ({ from, data }: SignalPayload) => {
+		async function handleSignal({ from, data }: SignalPayload) {
 			let peerConnection = peerConnections.get(from)
 
 			if (isDescription(data)) {
@@ -102,9 +110,24 @@ export const useRoomConnection = (
 			} else {
 				await peerConnection?.addIceCandidate(data)
 			}
-		})
+		}
+
+		socket.on('connect', handleConnect)
+		socket.on('room-joined', handleRoomJoined)
+		socket.on('peer-left', handlePeerLeft)
+		socket.on('signal', handleSignal)
+
+		if (socket.connected) {
+			handleConnect()
+		} else {
+			socket.connect()
+		}
 
 		return () => {
+			socket.off('connect', handleConnect)
+			socket.off('room-joined', handleRoomJoined)
+			socket.off('peer-left', handlePeerLeft)
+			socket.off('signal', handleSignal)
 			socket.disconnect()
 			peerConnections.forEach((peerConnection) => peerConnection.close())
 			peerConnections.clear()

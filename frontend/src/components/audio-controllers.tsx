@@ -1,7 +1,8 @@
 import { Check, Copy, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+
 import { useParams } from 'react-router-dom'
 import { useState } from 'react'
+import { Button } from '@/ui/button'
 
 interface AudioControllersProps {
 	muted: boolean
@@ -33,8 +34,7 @@ export const AudioControllers = ({
 	return (
 		<div className='flex items-center gap-2'>
 			<Button
-				disabled={isCopied}
-				size='icon'
+				size='xl'
 				variant={isCopied ? 'default' : 'outline'}
 				onClick={handleCopyRoomId}
 			>
@@ -42,7 +42,7 @@ export const AudioControllers = ({
 			</Button>
 
 			<Button
-				size='icon'
+				size='xl'
 				variant={muted ? 'outline' : 'default'}
 				onClick={onToggleMute}
 			>
@@ -50,7 +50,7 @@ export const AudioControllers = ({
 			</Button>
 
 			<Button
-				size='icon'
+				size='xl'
 				variant={outputMuted ? 'outline' : 'default'}
 				onClick={onToggleOutputMute}
 			>

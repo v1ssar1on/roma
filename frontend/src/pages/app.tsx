@@ -2,21 +2,24 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+
 import { createRoomId } from '../utils/create-room-id'
 import { createHost } from '../utils/create-host'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 import { useSettingsStore } from '@/store/store'
+import { Card, CardTitle } from '@/ui/card'
+import { Label } from '@/ui/label'
+import { Input } from '@/ui/input'
+import { Button } from '@/ui/button'
 
 export const App = () => {
 	const [roomInput, setRoomInput] = useState<string | null>()
 	const navigate = useNavigate()
+	// settings saved in localhost
 	const { name, setName } = useSettingsStore()
 
-	function openRoom() {
+	// create new room
+	function createRoom() {
 		const roomId = createRoomId()
 
 		createHost(roomId)
@@ -24,9 +27,10 @@ export const App = () => {
 		toast.success(`Новая комната создана: ${roomId}`)
 	}
 
+	// go to created room
 	function handleGoRoom() {
 		if (!roomInput) {
-			toast.warn('Поле не может быть пустым')
+			toast.warning('Поле не может быть пустым')
 			return
 		}
 
@@ -77,7 +81,7 @@ export const App = () => {
 							Присоединиться
 							<ArrowRight className='size-4' />
 						</Button>
-						<Button variant='outline' onClick={openRoom} className='w-full'>
+						<Button variant='outline' onClick={createRoom} className='w-full'>
 							Создать новую комнату
 						</Button>
 					</div>
