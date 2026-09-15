@@ -3,6 +3,7 @@ import { Check, Copy, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/tooltip'
+import { usePermissions } from '@/hooks/use-permissions'
 
 interface AudioControllersProps {
 	muted: boolean
@@ -19,6 +20,7 @@ export const AudioControllers = ({
 	outputMuted,
 	onToggleOutputMute,
 }: AudioControllersProps) => {
+	const { microphoneDenied } = usePermissions()
 	const [isCopied, setIsCopied] = useState<boolean>(false)
 
 	function handleCopyRoomId() {
@@ -33,41 +35,49 @@ export const AudioControllers = ({
 	return (
 		<div className='flex items-center gap-2'>
 			<Tooltip>
-				<TooltipTrigger>
-					<Button
-						size='xl'
-						variant={isCopied ? 'default' : 'outline'}
-						onClick={handleCopyRoomId}
-					>
-						{isCopied ? <Check /> : <Copy />}
-					</Button>
-				</TooltipTrigger>
+				<TooltipTrigger
+					render={
+						<Button
+							size='xl'
+							variant={isCopied ? 'default' : 'outline'}
+							onClick={handleCopyRoomId}
+						>
+							{isCopied ? <Check /> : <Copy />}
+						</Button>
+					}
+				/>
 				<TooltipContent>Скопировать ссылку на комнату</TooltipContent>
 			</Tooltip>
 
 			<Tooltip>
-				<TooltipTrigger>
-					<Button
-						size='xl'
-						variant={muted ? 'outline' : 'default'}
-						onClick={onToggleMute}
-					>
-						{muted ? <MicOff /> : <Mic />}
-					</Button>
-				</TooltipTrigger>
+				<TooltipTrigger
+					render={
+						<Button
+							disabled={microphoneDenied}
+							focusableWhenDisabled
+							size='xl'
+							variant={muted ? 'outline' : 'default'}
+							onClick={onToggleMute}
+						>
+							{muted ? <MicOff /> : <Mic />}
+						</Button>
+					}
+				/>
 				<TooltipContent>Включить/Отключить микрофон</TooltipContent>
 			</Tooltip>
 
 			<Tooltip>
-				<TooltipTrigger>
-					<Button
-						size='xl'
-						variant={outputMuted ? 'outline' : 'default'}
-						onClick={onToggleOutputMute}
-					>
-						{outputMuted ? <VolumeX /> : <Volume2 />}
-					</Button>
-				</TooltipTrigger>
+				<TooltipTrigger
+					render={
+						<Button
+							size='xl'
+							variant={outputMuted ? 'outline' : 'default'}
+							onClick={onToggleOutputMute}
+						>
+							{outputMuted ? <VolumeX /> : <Volume2 />}
+						</Button>
+					}
+				/>
 				<TooltipContent>Включить/Выключить звук</TooltipContent>
 			</Tooltip>
 		</div>

@@ -16,16 +16,18 @@ export const RoomHeader = ({
 	return (
 		<header className='flex items-center justify-between relative'>
 			<Tooltip>
-				<TooltipTrigger>
-					<CloseRoomAlert
-						trigger={
-							<Button variant='ghost' size='xl'>
-								<ArrowLeft className='size-4' />
-							</Button>
-						}
-						onConfirm={() => navigate('/')}
-					/>
-				</TooltipTrigger>
+				<CloseRoomAlert
+					trigger={
+						<TooltipTrigger
+							render={
+								<Button variant='ghost' size='xl'>
+									<ArrowLeft className='size-4' />
+								</Button>
+							}
+						/>
+					}
+					onConfirm={() => navigate('/')}
+				/>
 				<TooltipContent>Вернуться на главную</TooltipContent>
 			</Tooltip>
 

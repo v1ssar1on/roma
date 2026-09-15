@@ -72,10 +72,6 @@ export const useRoomConnection = (
 			})
 		}
 
-		function handleConnect() {
-			socket.emit('join-room', { roomId })
-		}
-
 		async function handleRoomJoined({
 			peerId: ownId,
 			peers,
@@ -88,10 +84,6 @@ export const useRoomConnection = (
 				await peerConnection.setLocalDescription(offer)
 				socket.emit('signal', { to: remotePeerId, data: offer })
 			}
-		}
-
-		function handlePeerLeft({ peerId: remotePeerId }: PeerLeftPayload) {
-			removePeer(remotePeerId)
 		}
 
 		async function handleSignal({ from, data }: SignalPayload) {
@@ -112,22 +104,24 @@ export const useRoomConnection = (
 			}
 		}
 
-		socket.on('connect', handleConnect)
-		socket.on('room-joined', handleRoomJoined)
-		socket.on('peer-left', handlePeerLeft)
-		socket.on('signal', handleSignal)
-
-		if (socket.connected) {
-			handleConnect()
-		} else {
-			socket.connect()
+		const listeners = {
+			connect: () => socket.emit('join-room', { roomId }),
+			'room-joined': handleRoomJoined,
+			'peer-left': ({ peerId: remotePeerId }: PeerLeftPayload) =>
+				removePeer(remotePeerId),
+			signal: handleSignal,
 		}
 
+		for (const [event, handler] of Object.entries(listeners)) {
+			socket.on(event, handler)
+		}
+
+		socket.connected ? listeners.connect() : socket.connect()
+
 		return () => {
-			socket.off('connect', handleConnect)
-			socket.off('room-joined', handleRoomJoined)
-			socket.off('peer-left', handlePeerLeft)
-			socket.off('signal', handleSignal)
+			for (const [event, handler] of Object.entries(listeners)) {
+				socket.off(event, handler)
+			}
 			socket.disconnect()
 			peerConnections.forEach((peerConnection) => peerConnection.close())
 			peerConnections.clear()
