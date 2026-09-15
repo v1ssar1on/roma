@@ -46,16 +46,12 @@ export const Room = () => {
 				</motion.div>
 			</div>
 
-			<footer className='flex justify-center pb-2'>
-				<div className='rounded-xl border border-border bg-card px-3 py-2 shadow-lg'>
-					<AudioControllers
-						muted={muted}
-						onToggleMute={muteToggleMicrophone}
-						outputMuted={outputMuted}
-						onToggleOutputMute={toggleOutputMute}
-					/>
-				</div>
-			</footer>
+			<AudioControllers
+				muted={muted}
+				onToggleMute={muteToggleMicrophone}
+				outputMuted={outputMuted}
+				onToggleOutputMute={toggleOutputMute}
+			/>
 		</div>
 	)
 }
