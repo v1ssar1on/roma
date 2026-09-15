@@ -1,14 +1,14 @@
 import {
 	Check,
-	CircleDot,
 	Copy,
 	Mic,
 	MicOff,
+	Speech,
 	Volume2,
 	VolumeX,
 } from 'lucide-react'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/tooltip'
 import { usePermissions } from '@/hooks/use-permissions'
@@ -36,6 +36,12 @@ export const AudioControllers = ({
 	const { microphoneDenied } = usePermissions()
 	const [isCopied, setIsCopied] = useState<boolean>(false)
 	const { transcript, listening } = useSpeechRecognition()
+
+	useEffect(() => {
+		if (muted) {
+			SpeechRecognition.stopListening()
+		}
+	}, [muted])
 
 	function handleCopyRoomId() {
 		navigator.clipboard.writeText(window.location.href)
@@ -65,12 +71,12 @@ export const AudioControllers = ({
 							<TooltipTrigger
 								render={
 									<Button
-										disabled={microphoneDenied}
+										disabled={microphoneDenied || muted}
 										onClick={handleToggleListening}
 										variant={listening ? 'destructive' : 'outline'}
 										className={cn(listening && 'animate-pulse')}
 									>
-										<CircleDot />
+										<Speech />
 									</Button>
 								}
 							/>

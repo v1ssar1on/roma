@@ -5,26 +5,25 @@ export const useStream = () => {
 	const [isMuted, setIsMuted] = useState<boolean>(true)
 
 	useEffect(() => {
-		let activeStream: MediaStream | undefined
-
 		async function getMediaDevices() {
-			const mediaStream = await navigator.mediaDevices.getUserMedia({
-				audio: true,
-			})
+			const [userMedia] = await Promise.all([
+				navigator.mediaDevices.getUserMedia({
+					audio: true,
+				}),
+				// navigator.mediaDevices.getDisplayMedia({
+				// 	video: true,
+				// 	audio: true,
+				// }),
+			])
 
-			mediaStream.getAudioTracks().forEach((track) => {
+			userMedia.getAudioTracks().forEach((track) => {
 				track.enabled = false
 			})
 
-			activeStream = mediaStream
-			setStream(mediaStream)
+			setStream(userMedia)
 		}
 
 		getMediaDevices()
-
-		return () => {
-			activeStream?.getTracks().forEach((track) => track.stop())
-		}
 	}, [])
 
 	function muteToggleMicrophone() {
