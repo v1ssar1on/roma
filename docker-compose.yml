@@ -1,0 +1,19 @@
+services:
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # leave empty to let the browser default to `${host}:3000` (see src/api/socket.ts) -
+        # set it if backend lives behind another host/port/proxy
+        VITE_WS_URL: ${VITE_WS_URL:-}
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    depends_on:
+      - backend

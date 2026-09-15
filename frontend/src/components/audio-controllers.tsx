@@ -71,6 +71,7 @@ export const AudioControllers = ({
 							<TooltipTrigger
 								render={
 									<Button
+										focusableWhenDisabled
 										disabled={microphoneDenied || muted}
 										onClick={handleToggleListening}
 										variant={listening ? 'destructive' : 'outline'}
@@ -81,8 +82,8 @@ export const AudioControllers = ({
 								}
 							/>
 							<TooltipContent>
-								{microphoneDenied
-									? 'Нужно дать разрешение микрофона'
+								{microphoneDenied || muted
+									? 'Нужно включить микрофон/дать разрешение микрофона'
 									: 'Распознование речи'}{' '}
 							</TooltipContent>
 						</Tooltip>
