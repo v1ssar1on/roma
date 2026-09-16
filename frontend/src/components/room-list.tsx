@@ -20,15 +20,7 @@ export const RoomList = () => {
 	if (Boolean(!rooms.length)) {
 		return (
 			<Card className='w-full p-4 text-center text-sm text-muted-foreground'>
-				Не удалось загрузить список комнат
-			</Card>
-		)
-	}
-
-	if (rooms!.length === 0) {
-		return (
-			<Card className='w-full p-4 text-center text-sm text-muted-foreground'>
-				Активных комнат пока нет
+				Нет созданных комнат
 			</Card>
 		)
 	}

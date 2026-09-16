@@ -9,7 +9,7 @@ import {
 	VolumeX,
 } from 'lucide-react'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/tooltip'
 import { usePermissions } from '@/hooks/use-permissions'
@@ -39,12 +39,7 @@ export const AudioControllers = ({
 	const { microphoneDenied } = usePermissions()
 	const [isCopied, setIsCopied] = useState<boolean>(false)
 	const { transcript, listening } = useSpeechRecognition()
-
-	useEffect(() => {
-		if (muted) {
-			SpeechRecognition.stopListening()
-		}
-	}, [muted])
+	const stopListening = SpeechRecognition.stopListening
 
 	function handleCopyRoomId() {
 		navigator.clipboard.writeText(window.location.href)
@@ -55,9 +50,16 @@ export const AudioControllers = ({
 		}, TIMEOUT_DURATION)
 	}
 
+	function handleToggleMute() {
+		if (!muted) {
+			stopListening()
+		}
+		onToggleMute()
+	}
+
 	function handleToggleListening() {
 		listening
-			? SpeechRecognition.stopListening()
+			? stopListening()
 			: SpeechRecognition.startListening({
 					continuous: true,
 					language: 'ru-RU',
@@ -114,7 +116,7 @@ export const AudioControllers = ({
 										focusableWhenDisabled
 										size='xl'
 										variant={muted ? 'outline' : 'default'}
-										onClick={onToggleMute}
+										onClick={handleToggleMute}
 									>
 										{muted ? <MicOff /> : <Mic />}
 									</Button>
