@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { toast } from 'sonner'
 import type {
 	PeerLeftPayload,
 	RoomId,
@@ -116,7 +117,10 @@ export const useRoomStore = create<RoomState>((set, get) => ({
 		const listeners = {
 			connect: () => socket.emit('join-room', { roomId, name }),
 			'room-joined': handleRoomJoined,
-			'room-not-found': () => set({ roomNotFound: true }),
+			'room-not-found': () => {
+				toast.error('Такой комнаты не существует')
+				set({ roomNotFound: true })
+			},
 			'peer-joined': () => playSound(joinSound),
 			'peer-left': ({ peerId: remotePeerId }: PeerLeftPayload) =>
 				removePeer(remotePeerId),

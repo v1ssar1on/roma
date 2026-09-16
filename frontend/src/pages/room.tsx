@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { Navigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
-import { toast } from 'sonner'
 import { AudioControllers } from '../components/audio-controllers'
 
 import { useStream } from '../hooks/use-stream'
@@ -14,7 +13,6 @@ import { useDisclosure } from '@/hooks/use-disclosure'
 export const Room = () => {
 	const { isOpen: open, onClose } = useDisclosure()
 	const { roomId } = useParams()
-	const navigate = useNavigate()
 	const { stream, muted, muteToggleMicrophone } = useStream()
 	// peers
 	const { peerId, remoteStreams, roomNotFound } = useRoomConnection(
@@ -23,12 +21,9 @@ export const Room = () => {
 	)
 	const [outputMuted, setOutputMuted] = useState(false)
 
-	useEffect(() => {
-		if (!roomNotFound) return
-
-		toast.error('Такой комнаты не существует')
-		navigate('/')
-	}, [roomNotFound, navigate])
+	if (roomNotFound) {
+		return <Navigate to='/' replace />
+	}
 
 	function toggleOutputMute() {
 		setOutputMuted((prev) => !prev)
