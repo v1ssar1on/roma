@@ -14,12 +14,23 @@ import {
 import { Field, FieldLabel } from '@/ui/field'
 import { Textarea } from '@/ui/textarea'
 import { Button } from '@/ui/button'
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/ui/drawer'
 import { keyboardEvent } from '@/utils/keyboard-event'
 import { socket } from '@/api/socket'
 import { useSettingsStore } from '@/store/store'
 import type { MessagePayload } from '@/types/types'
 
-export const MessageScrollbar = ({ ready }: { ready: boolean }) => {
+interface MessageScrollbarProps {
+	ready: boolean
+	open: boolean
+	onOpenChange: (open: boolean) => void
+}
+
+export const MessageScrollbar = ({
+	ready,
+	open,
+	onOpenChange,
+}: MessageScrollbarProps) => {
 	const { name } = useSettingsStore()
 	const [messages, setMessages] = useState<MessagePayload[]>([])
 	const [inputValue, setInputValue] = useState<string | null>()
@@ -50,72 +61,82 @@ export const MessageScrollbar = ({ ready }: { ready: boolean }) => {
 	}
 
 	return (
-		<MessageScrollerProvider>
-			<div className='flex h-full min-h-0 flex-col gap-2 px-2 pb-2 sm:gap-3 sm:px-4 sm:pb-4'>
-				<MessageScroller className='min-h-0 flex-1'>
-					<MessageScrollerViewport>
-						<MessageScrollerContent className='gap-4 sm:gap-6'>
-							{messages.map((message) => {
-								const isOwn = message.authorName === name
+		<Drawer open={open} onOpenChange={onOpenChange} swipeDirection='right'>
+			<DrawerContent>
+				<DrawerHeader>
+					<DrawerTitle>Чат</DrawerTitle>
+				</DrawerHeader>
 
-								return (
-									<MessageScrollerItem
-										key={message.id}
-										messageId={message.id}
-										scrollAnchor={isOwn}
-									>
-										<Message align={isOwn ? 'end' : 'start'}>
-											<MessageAvatar className='hidden sm:flex'>
-												<Avatar>
-													<AvatarFallback>
-														<User className='size-4' />
-													</AvatarFallback>
-												</Avatar>
-											</MessageAvatar>
-											<MessageContent>
-												<Bubble
-													align={isOwn ? 'end' : 'start'}
-													variant={isOwn ? 'default' : 'secondary'}
-													className='max-w-[90%] sm:max-w-[80%]'
-												>
-													<BubbleContent>{message.text}</BubbleContent>
-												</Bubble>
-											</MessageContent>
-										</Message>
-									</MessageScrollerItem>
-								)
-							})}
-						</MessageScrollerContent>
-					</MessageScrollerViewport>
+				<MessageScrollerProvider>
+					<div className='flex h-full min-h-0 flex-col gap-2 px-2 pb-2 sm:gap-3 sm:px-4 sm:pb-4'>
+						<MessageScroller className='min-h-0 flex-1'>
+							<MessageScrollerViewport>
+								<MessageScrollerContent className='gap-4 sm:gap-6'>
+									{messages.map((message) => {
+										const isOwn = message.authorName === name
 
-					<MessageScrollerButton />
-				</MessageScroller>
+										return (
+											<MessageScrollerItem
+												key={message.id}
+												messageId={message.id}
+												scrollAnchor={isOwn}
+											>
+												<Message align={isOwn ? 'end' : 'start'}>
+													<MessageAvatar className='hidden sm:flex'>
+														<Avatar>
+															<AvatarFallback>
+																<User className='size-4' />
+															</AvatarFallback>
+														</Avatar>
+													</MessageAvatar>
+													<MessageContent>
+														<Bubble
+															align={isOwn ? 'end' : 'start'}
+															variant={isOwn ? 'default' : 'secondary'}
+															className='max-w-[90%] sm:max-w-[80%]'
+														>
+															<BubbleContent>{message.text}</BubbleContent>
+														</Bubble>
+													</MessageContent>
+												</Message>
+											</MessageScrollerItem>
+										)
+									})}
+								</MessageScrollerContent>
+							</MessageScrollerViewport>
 
-				<Field>
-					<FieldLabel htmlFor='textarea-message' className='sr-only'>
-						Сообщение
-					</FieldLabel>
-					<div className='flex items-end gap-2'>
-						<Textarea
-							onKeyDown={keyboardEvent('Enter', handleSendMessage)}
-							className='min-h-12 max-h-32 flex-1 resize-none sm:min-h-16'
-							id='textarea-message'
-							placeholder={ready ? 'Написать сообщение...' : 'Подключаемся...'}
-							value={inputValue ?? ''}
-							onChange={(e) => setInputValue(e.target.value)}
-							disabled={!ready}
-						/>
-						<Button
-							size='icon'
-							onClick={handleSendMessage}
-							disabled={!ready || !inputValue}
-						>
-							<Send className='size-4' />
-							<span className='sr-only'>Отправить</span>
-						</Button>
+							<MessageScrollerButton />
+						</MessageScroller>
+
+						<Field>
+							<FieldLabel htmlFor='textarea-message' className='sr-only'>
+								Сообщение
+							</FieldLabel>
+							<div className='flex items-end gap-2'>
+								<Textarea
+									onKeyDown={keyboardEvent('Enter', handleSendMessage)}
+									className='min-h-12 max-h-32 flex-1 resize-none sm:min-h-16'
+									id='textarea-message'
+									placeholder={
+										ready ? 'Написать сообщение...' : 'Подключаемся...'
+									}
+									value={inputValue ?? ''}
+									onChange={(e) => setInputValue(e.target.value)}
+									disabled={!ready}
+								/>
+								<Button
+									size='icon'
+									onClick={handleSendMessage}
+									disabled={!ready || !inputValue}
+								>
+									<Send className='size-4' />
+									<span className='sr-only'>Отправить</span>
+								</Button>
+							</div>
+						</Field>
 					</div>
-				</Field>
-			</div>
-		</MessageScrollerProvider>
+				</MessageScrollerProvider>
+			</DrawerContent>
+		</Drawer>
 	)
 }

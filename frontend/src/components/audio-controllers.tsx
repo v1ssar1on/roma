@@ -1,6 +1,7 @@
 import {
 	Check,
 	Copy,
+	MessagesCircle,
 	Mic,
 	MicOff,
 	Speech,
@@ -22,6 +23,7 @@ interface AudioControllersProps {
 	onToggleMute: () => void
 	outputMuted: boolean
 	onToggleOutputMute: () => void
+	onToggleChat: () => void
 }
 
 // timeout milliseconds
@@ -32,6 +34,7 @@ export const AudioControllers = ({
 	onToggleMute,
 	outputMuted,
 	onToggleOutputMute,
+	onToggleChat,
 }: AudioControllersProps) => {
 	const { microphoneDenied } = usePermissions()
 	const [isCopied, setIsCopied] = useState<boolean>(false)
@@ -133,6 +136,17 @@ export const AudioControllers = ({
 								}
 							/>
 							<TooltipContent>Включить/Выключить звук</TooltipContent>
+						</Tooltip>
+
+						<Tooltip>
+							<TooltipTrigger
+								render={
+									<Button onClick={onToggleChat} size='xl' variant={'outline'}>
+										<MessagesCircle />
+									</Button>
+								}
+							/>
+							<TooltipContent>Открыть/Закрыть чат</TooltipContent>
 						</Tooltip>
 					</div>
 				</div>

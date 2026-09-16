@@ -17,7 +17,6 @@ import { RoomList } from '@/components/room-list'
 export const App = () => {
 	const [roomInput, setRoomInput] = useState<string | null>()
 	const navigate = useNavigate()
-	// settings saved in localhost
 	const { name, setName } = useSettingsStore()
 
 	// create new room
