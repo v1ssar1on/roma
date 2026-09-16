@@ -12,8 +12,39 @@ services:
         # baked in at build time - point it at the public URL Dokploy assigns
         # the backend service (its Domain, e.g. https://ws.yourdomain.com)
         VITE_WS_URL: ${VITE_WS_URL}
+        # свой TURN (coturn ниже). Оставь пустыми, если TURN не нужен (тогда
+        # WebRTC останется на одном STUN и не пробьёт часть реальных NAT)
+        VITE_TURN_URL: ${TURN_EXTERNAL_IP:+${TURN_EXTERNAL_IP}:3478}
+        VITE_TURN_USERNAME: ${TURN_USERNAME:-roma}
+        VITE_TURN_CREDENTIAL: ${TURN_PASSWORD}
     restart: unless-stopped
     expose:
       - '7331'
     depends_on:
       - backend
+
+  # TURN-релей для WebRTC-звонков за NAT, которые не пробивает один STUN.
+  # network_mode: host - так рекомендует сам coturn, потому что он динамически
+  # выделяет порт из диапазона --min-port..--max-port под каждый медиапоток,
+  # и через обычный docker port-mapping это не прокинуть разумным способом.
+  # Требует: TURN_EXTERNAL_IP (публичный IP сервера, тот же что в домене) и
+  # TURN_PASSWORD заданными в окружении Dokploy; на хосте/файрволе должны
+  # быть открыты 3478/udp+tcp и 49160-49200/udp.
+  turn:
+    image: coturn/coturn:4.6
+    restart: unless-stopped
+    network_mode: host
+    command:
+      - -n
+      - --log-file=stdout
+      - --listening-port=3478
+      - --min-port=49160
+      - --max-port=49200
+      - --realm=roma.turn
+      - --lt-cred-mech
+      - --fingerprint
+      - --no-cli
+      - --no-tls
+      - --no-dtls
+      - --user=${TURN_USERNAME:-roma}:${TURN_PASSWORD:?set TURN_PASSWORD in the Dokploy environment}
+      - --external-ip=${TURN_EXTERNAL_IP:?set TURN_EXTERNAL_IP to the server's public IP in the Dokploy environment}
