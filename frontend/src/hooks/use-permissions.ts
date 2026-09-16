@@ -1,18 +1,10 @@
-import { useEffect, useState } from 'react'
+import { use } from 'react'
+
+const microphonePermissionPromise = navigator.permissions.query({
+	name: 'microphone',
+})
 
 export const usePermissions = () => {
-	const [permissions, setPermissions] = useState<PermissionStatus | undefined>()
-	const microphoneDenied = permissions?.state === 'denied'
-
-	useEffect(() => {
-		async function getPermissions() {
-			const result = await navigator.permissions.query({ name: 'microphone' })
-
-			setPermissions(result)
-		}
-
-		getPermissions()
-	}, [])
-
-	return { permissions, microphoneDenied }
+	const permissions = use(microphonePermissionPromise)
+	return { permissions, microphoneDenied: permissions?.state === 'denied' }
 }
