@@ -3,9 +3,9 @@ import { useState } from 'react'
 export const useDisclosure = () => {
 	const [isOpen, setIsOpen] = useState<boolean>(false)
 
-	function onClose() {
+	function toggle() {
 		setIsOpen((prev) => !prev)
 	}
 
-	return { isOpen, onClose }
+	return { isOpen, toggle }
 }

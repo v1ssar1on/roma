@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { AudioControllers } from '../components/audio-controllers'
@@ -11,7 +10,8 @@ import { MessageScrollbar } from '@/components/message-scrollbar'
 import { useDisclosure } from '@/hooks/use-disclosure'
 
 export const Room = () => {
-	const { isOpen: open, onClose } = useDisclosure()
+	const { isOpen: open, toggle: onClose } = useDisclosure()
+	const { isOpen: outputMuted, toggle: toggleOutputMuted } = useDisclosure()
 	const { roomId } = useParams()
 	const { stream, muted, muteToggleMicrophone } = useStream()
 	// peers
@@ -19,14 +19,9 @@ export const Room = () => {
 		roomId,
 		stream,
 	)
-	const [outputMuted, setOutputMuted] = useState(false)
 
 	if (roomNotFound) {
 		return <Navigate to='/' replace />
-	}
-
-	function toggleOutputMute() {
-		setOutputMuted((prev) => !prev)
 	}
 
 	// peer ids
@@ -76,7 +71,7 @@ export const Room = () => {
 				onToggleChat={onClose}
 				onToggleMute={muteToggleMicrophone}
 				outputMuted={outputMuted}
-				onToggleOutputMute={toggleOutputMute}
+				onToggleOutputMute={toggleOutputMuted}
 			/>
 
 			{Object.entries(remoteStreams).map(([remotePeerId, remoteStream]) => (
