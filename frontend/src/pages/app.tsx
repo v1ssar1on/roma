@@ -12,6 +12,7 @@ import { Card, CardTitle } from '@/ui/card'
 import { Label } from '@/ui/label'
 import { Input } from '@/ui/input'
 import { Button } from '@/ui/button'
+import { RoomList } from '@/components/room-list'
 
 export const App = () => {
 	const [roomInput, setRoomInput] = useState<string | null>()
@@ -92,6 +93,13 @@ export const App = () => {
 						</Button>
 					</div>
 				</Card>
+
+				<div className='mt-6 flex w-full flex-col gap-2'>
+					<span className='text-xs font-medium tracking-widest text-muted-foreground uppercase'>
+						Активные комнаты
+					</span>
+					<RoomList />
+				</div>
 			</motion.div>
 		</div>
 	)
