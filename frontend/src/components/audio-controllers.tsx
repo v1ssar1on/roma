@@ -21,8 +21,10 @@ import { cn } from '@/lib/utils'
 interface AudioControllersProps {
 	muted: boolean
 	onToggleMute: () => void
+
 	outputMuted: boolean
 	onToggleOutputMute: () => void
+
 	onToggleChat: () => void
 }
 
@@ -54,6 +56,7 @@ export const AudioControllers = ({
 		if (!muted) {
 			stopListening()
 		}
+
 		onToggleMute()
 	}
 

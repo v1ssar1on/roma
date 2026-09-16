@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { ArrowRight } from 'lucide-react'
 
-import { createRoomId } from '../utils/create-room-id'
-import { createHost } from '../utils/create-host'
-import { createRoom as createRoomRequest } from '../api/rooms'
 import { toast } from 'sonner'
 import { useSettingsStore } from '@/store/store'
 import { Card, CardTitle } from '@/ui/card'
@@ -13,25 +10,12 @@ import { Label } from '@/ui/label'
 import { Input } from '@/ui/input'
 import { Button } from '@/ui/button'
 import { RoomList } from '@/components/room-list'
+import { useCreateRoom } from '@/hooks/use-create-room'
 
 export const App = () => {
 	const [roomInput, setRoomInput] = useState<string | null>()
 	const navigate = useNavigate()
 	const { name, setName } = useSettingsStore()
-
-	// create new room
-	async function createRoom() {
-		const roomId = createRoomId()
-
-		try {
-			const { creatorToken } = await createRoomRequest(roomId, name)
-			createHost(roomId, creatorToken)
-			navigate(`room/${roomId}`)
-			toast.success(`Новая комната создана: ${roomId}`)
-		} catch {
-			toast.error('Не удалось создать комнату, попробуй ещё раз')
-		}
-	}
 
 	// go to created room
 	function handleGoRoom() {
@@ -87,7 +71,11 @@ export const App = () => {
 							Присоединиться
 							<ArrowRight className='size-4' />
 						</Button>
-						<Button variant='outline' onClick={createRoom} className='w-full'>
+						<Button
+							variant='outline'
+							onClick={() => useCreateRoom(name)}
+							className='w-full'
+						>
 							Создать новую комнату
 						</Button>
 					</div>
