@@ -6,6 +6,8 @@ import type {
 	SignalPayload,
 } from '../types/types'
 import { ICE_SERVERS, socket } from '../api/socket'
+import { playSound } from '@/utils/play-sound'
+import { joinSound, leaveSound } from '@/lib/sounds'
 
 function isDescription(
 	data: SignalPayload['data'],
@@ -76,6 +78,7 @@ export const useRoomStore = create<RoomState>((set, get) => ({
 				delete next[remotePeerId]
 				return { remoteStreams: next }
 			})
+			playSound(leaveSound)
 		}
 
 		async function handleRoomJoined({
@@ -114,6 +117,7 @@ export const useRoomStore = create<RoomState>((set, get) => ({
 			connect: () => socket.emit('join-room', { roomId, name }),
 			'room-joined': handleRoomJoined,
 			'room-not-found': () => set({ roomNotFound: true }),
+			'peer-joined': () => playSound(joinSound),
 			'peer-left': ({ peerId: remotePeerId }: PeerLeftPayload) =>
 				removePeer(remotePeerId),
 			signal: handleSignal,
