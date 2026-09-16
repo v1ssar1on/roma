@@ -1,12 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 import { Loader2, Users } from 'lucide-react'
-import { listRooms, type RoomListItem } from '@/api/rooms'
+import { roomsFetch, type RoomListItem } from '@/api/rooms'
 import { Card } from '@/ui/card'
 import { use } from 'react'
 
 export const RoomList = () => {
 	const navigate = useNavigate()
-	const rooms = use<RoomListItem[]>(listRooms())
+	const rooms = use<RoomListItem[]>(roomsFetch())
 
 	if (rooms === null) {
 		return (

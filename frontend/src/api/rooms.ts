@@ -1,5 +1,6 @@
 import { WS_URL } from './socket'
 import type { RoomId } from '../types/types'
+import { fetchData } from '@/utils/cache'
 
 interface CreateRoomResponse {
 	roomId: string
@@ -31,27 +32,26 @@ export interface RoomListItem {
 	online: number
 }
 
-let roomsPromise: Promise<RoomListItem[]> | null = null
-
-function fetchRooms(): Promise<RoomListItem[]> {
-	return fetch(`${WS_URL}/rooms`).then((response) => {
-		if (!response.ok) {
-			throw new Error('Не удалось получить список комнат')
-		}
-
-		return response.json()
-	})
-}
-
 export function listRooms(): Promise<RoomListItem[]> {
-	roomsPromise ??= fetchRooms()
-	return roomsPromise
+	const rooms = fetch(`${WS_URL}/rooms`)
+		.then((response) => {
+			if (!response.ok) {
+				throw new Error('Не удалось получить список комнат')
+			}
+
+			return response.json()
+		})
+		.catch((err) => {
+			throw new Error(err)
+		})
+
+	return rooms
 }
 
-// сбрасывает кэш - следующий listRooms() создаст новый промис с
-// актуальными данными (для поллинга: use() отследит смену ссылки)
-export function refreshRooms(): void {
-	roomsPromise = fetchRooms()
+export const roomsFetch = () => {
+	const data = fetchData(`${WS_URL}/rooms`, listRooms)
+
+	return data
 }
 
 export async function deleteRoom(
