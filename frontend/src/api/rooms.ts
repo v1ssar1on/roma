@@ -31,14 +31,27 @@ export interface RoomListItem {
 	online: number
 }
 
-export async function listRooms(): Promise<RoomListItem[]> {
-	const response = await fetch(`${WS_URL}/rooms`)
+let roomsPromise: Promise<RoomListItem[]> | null = null
 
-	if (!response.ok) {
-		throw new Error('Не удалось получить список комнат')
-	}
+function fetchRooms(): Promise<RoomListItem[]> {
+	return fetch(`${WS_URL}/rooms`).then((response) => {
+		if (!response.ok) {
+			throw new Error('Не удалось получить список комнат')
+		}
 
-	return response.json()
+		return response.json()
+	})
+}
+
+export function listRooms(): Promise<RoomListItem[]> {
+	roomsPromise ??= fetchRooms()
+	return roomsPromise
+}
+
+// сбрасывает кэш - следующий listRooms() создаст новый промис с
+// актуальными данными (для поллинга: use() отследит смену ссылки)
+export function refreshRooms(): void {
+	roomsPromise = fetchRooms()
 }
 
 export async function deleteRoom(

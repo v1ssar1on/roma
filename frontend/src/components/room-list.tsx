@@ -1,41 +1,14 @@
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Loader2, Users } from 'lucide-react'
 import { listRooms, type RoomListItem } from '@/api/rooms'
 import { Card } from '@/ui/card'
-
-const POLL_INTERVAL = 5000
+import { use } from 'react'
 
 export const RoomList = () => {
 	const navigate = useNavigate()
-	const [rooms, setRooms] = useState<RoomListItem[] | null>(null)
-	const [failed, setFailed] = useState(false)
+	const rooms = use<RoomListItem[]>(listRooms())
 
-	useEffect(() => {
-		let cancelled = false
-
-		async function load() {
-			try {
-				const data = await listRooms()
-				if (!cancelled) {
-					setRooms(data)
-					setFailed(false)
-				}
-			} catch {
-				if (!cancelled) setFailed(true)
-			}
-		}
-
-		load()
-		const interval = setInterval(load, POLL_INTERVAL)
-
-		return () => {
-			cancelled = true
-			clearInterval(interval)
-		}
-	}, [])
-
-	if (rooms === null && !failed) {
+	if (rooms === null) {
 		return (
 			<Card className='flex w-full flex-row items-center justify-center gap-2 p-4 text-sm text-muted-foreground'>
 				<Loader2 className='size-4 animate-spin' />
@@ -44,7 +17,7 @@ export const RoomList = () => {
 		)
 	}
 
-	if (failed) {
+	if (Boolean(!rooms.length)) {
 		return (
 			<Card className='w-full p-4 text-center text-sm text-muted-foreground'>
 				Не удалось загрузить список комнат

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { ArrowRight } from 'lucide-react'
@@ -97,7 +97,9 @@ export const App = () => {
 					<span className='text-xs font-medium tracking-widest text-muted-foreground uppercase'>
 						Активные комнаты
 					</span>
-					<RoomList />
+					<Suspense fallback={<div>Loading...</div>}>
+						<RoomList />
+					</Suspense>
 				</div>
 			</motion.div>
 		</div>
