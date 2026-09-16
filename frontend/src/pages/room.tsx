@@ -87,6 +87,17 @@ export const Room = () => {
 				outputMuted={outputMuted}
 				onToggleOutputMute={toggleOutputMute}
 			/>
+
+			{Object.entries(remoteStreams).map(([remotePeerId, remoteStream]) => (
+				<audio
+					key={remotePeerId}
+					ref={(audio) => {
+						if (audio) audio.srcObject = remoteStream
+					}}
+					muted={outputMuted}
+					autoPlay
+				/>
+			))}
 		</div>
 	)
 }
