@@ -19,6 +19,7 @@ export const useRoomConnection = (
 	localStream: MediaStream | undefined,
 ) => {
 	const [peerId, setPeerId] = useState<string>()
+	const [roomNotFound, setRoomNotFound] = useState(false)
 	const [remoteStreams, setRemoteStreams] = useState<
 		Record<string, MediaStream>
 	>({})
@@ -105,8 +106,9 @@ export const useRoomConnection = (
 		}
 
 		const listeners = {
-			connect: () => socket.emit('join-room', { roomId }),
+			connect: () => socket.emit('join-room', { roomId, name }),
 			'room-joined': handleRoomJoined,
+			'room-not-found': () => setRoomNotFound(true),
 			'peer-left': ({ peerId: remotePeerId }: PeerLeftPayload) =>
 				removePeer(remotePeerId),
 			signal: handleSignal,
@@ -129,5 +131,5 @@ export const useRoomConnection = (
 		}
 	}, [roomId, localStream])
 
-	return { peerId, remoteStreams }
+	return { peerId, remoteStreams, roomNotFound }
 }

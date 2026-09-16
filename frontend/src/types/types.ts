@@ -13,3 +13,10 @@ export interface SignalPayload {
 	from: string
 	data: RTCSessionDescriptionInit | RTCIceCandidateInit
 }
+
+export interface MessagePayload {
+	id: string
+	text: string
+	authorName: string
+	createdAt: string
+}

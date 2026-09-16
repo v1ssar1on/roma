@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react'
 
 import { createRoomId } from '../utils/create-room-id'
 import { createHost } from '../utils/create-host'
+import { createRoom as createRoomRequest } from '../api/rooms'
 import { toast } from 'sonner'
 import { useSettingsStore } from '@/store/store'
 import { Card, CardTitle } from '@/ui/card'
@@ -19,12 +20,17 @@ export const App = () => {
 	const { name, setName } = useSettingsStore()
 
 	// create new room
-	function createRoom() {
+	async function createRoom() {
 		const roomId = createRoomId()
 
-		createHost(roomId)
-		navigate(`room/${roomId}`)
-		toast.success(`Новая комната создана: ${roomId}`)
+		try {
+			const { creatorToken } = await createRoomRequest(roomId, name)
+			createHost(roomId, creatorToken)
+			navigate(`room/${roomId}`)
+			toast.success(`Новая комната создана: ${roomId}`)
+		} catch {
+			toast.error('Не удалось создать комнату, попробуй ещё раз')
+		}
 	}
 
 	// go to created room

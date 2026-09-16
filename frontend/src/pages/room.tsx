@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
+import { toast } from 'sonner'
 import { AudioControllers } from '../components/audio-controllers'
 
 import { useStream } from '../hooks/use-stream'
@@ -17,11 +18,22 @@ import {
 
 export const Room = () => {
 	const { roomId } = useParams()
+	const navigate = useNavigate()
 	const { stream, muted, muteToggleMicrophone } = useStream()
 	// peers
-	const { peerId, remoteStreams } = useRoomConnection(roomId, stream)
+	const { peerId, remoteStreams, roomNotFound } = useRoomConnection(
+		roomId,
+		stream,
+	)
 	const [outputMuted, setOutputMuted] = useState(false)
 	const isMobile = useMediaQuery('(max-width: 639px)')
+
+	useEffect(() => {
+		if (!roomNotFound) return
+
+		toast.error('Такой комнаты не существует')
+		navigate('/')
+	}, [roomNotFound, navigate])
 
 	function toggleOutputMute() {
 		setOutputMuted((prev) => !prev)
@@ -77,7 +89,7 @@ export const Room = () => {
 				<ResizableHandle withHandle />
 
 				<ResizablePanel defaultSize={isMobile ? '45%' : '30%'} minSize='20%'>
-					<MessageScrollbar />
+					<MessageScrollbar ready={Boolean(peerId)} />
 				</ResizablePanel>
 			</ResizablePanelGroup>
 

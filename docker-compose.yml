@@ -1,7 +1,19 @@
 services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    # порт наружу не публикуется - к базе достаёт только backend, через
+    # внутреннюю docker-сеть по имени сервиса (mongo:27017)
+
   backend:
     build: ./backend
     restart: unless-stopped
+    environment:
+      DATABASE_URL: mongodb://mongo:27017/roma
+    depends_on:
+      - mongo
     expose:
       - '1337'
 
@@ -48,3 +60,6 @@ services:
       - --no-dtls
       - --user=${TURN_USERNAME:-roma}:${TURN_PASSWORD:?set TURN_PASSWORD in the Dokploy environment}
       - --external-ip=${TURN_EXTERNAL_IP:?set TURN_EXTERNAL_IP to the server's public IP in the Dokploy environment}
+
+volumes:
+  mongo-data:

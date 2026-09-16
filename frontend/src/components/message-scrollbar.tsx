@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { nanoid } from 'nanoid'
+import { useEffect, useState } from 'react'
 import { Send, User } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/ui/avatar'
 import { Bubble, BubbleContent } from '@/ui/bubble'
@@ -16,29 +15,37 @@ import { Field, FieldLabel } from '@/ui/field'
 import { Textarea } from '@/ui/textarea'
 import { Button } from '@/ui/button'
 import { keyboardEvent } from '@/utils/keyboard-event'
+import { socket } from '@/api/socket'
+import { useSettingsStore } from '@/store/store'
+import type { MessagePayload } from '@/types/types'
 
-interface TranscriptMessage {
-	id: string
-	role: 'user' | 'peer'
-	text: string
-}
-
-const messagesArr: TranscriptMessage[] = Array.from({ length: 11 }, () => [
-	{ id: nanoid(), role: 'peer' as const, text: 'Привет! Как слышно?' },
-	{ id: nanoid(), role: 'user' as const, text: 'Норм, всё слышно' },
-]).flat()
-
-export const MessageScrollbar = () => {
-	const [messages, setMessages] = useState(messagesArr)
+export const MessageScrollbar = ({ ready }: { ready: boolean }) => {
+	const { name } = useSettingsStore()
+	const [messages, setMessages] = useState<MessagePayload[]>([])
 	const [inputValue, setInputValue] = useState<string | null>()
+
+	useEffect(() => {
+		function handleHistory(history: MessagePayload[]) {
+			setMessages(history)
+		}
+
+		function handleNewMessage(message: MessagePayload) {
+			setMessages((prev) => [...prev, message])
+		}
+
+		socket.on('message-history', handleHistory)
+		socket.on('new-message', handleNewMessage)
+
+		return () => {
+			socket.off('message-history', handleHistory)
+			socket.off('new-message', handleNewMessage)
+		}
+	}, [])
 
 	function handleSendMessage() {
 		if (!inputValue?.trim()) return
 
-		setMessages((prev) => [
-			...prev,
-			{ id: nanoid(), role: 'user', text: inputValue },
-		])
+		socket.emit('send-message', { text: inputValue.trim() })
 		setInputValue('')
 	}
 
@@ -48,34 +55,36 @@ export const MessageScrollbar = () => {
 				<MessageScroller className='min-h-0 flex-1'>
 					<MessageScrollerViewport>
 						<MessageScrollerContent className='gap-4 sm:gap-6'>
-							{messages.map((message) => (
-								<MessageScrollerItem
-									key={message.id}
-									messageId={message.id}
-									scrollAnchor={message.role === 'user'}
-								>
-									<Message align={message.role === 'user' ? 'end' : 'start'}>
-										<MessageAvatar className='hidden sm:flex'>
-											<Avatar>
-												<AvatarFallback>
-													<User className='size-4' />
-												</AvatarFallback>
-											</Avatar>
-										</MessageAvatar>
-										<MessageContent>
-											<Bubble
-												align={message.role === 'user' ? 'end' : 'start'}
-												variant={
-													message.role === 'user' ? 'default' : 'secondary'
-												}
-												className='max-w-[90%] sm:max-w-[80%]'
-											>
-												<BubbleContent>{message.text}</BubbleContent>
-											</Bubble>
-										</MessageContent>
-									</Message>
-								</MessageScrollerItem>
-							))}
+							{messages.map((message) => {
+								const isOwn = message.authorName === name
+
+								return (
+									<MessageScrollerItem
+										key={message.id}
+										messageId={message.id}
+										scrollAnchor={isOwn}
+									>
+										<Message align={isOwn ? 'end' : 'start'}>
+											<MessageAvatar className='hidden sm:flex'>
+												<Avatar>
+													<AvatarFallback>
+														<User className='size-4' />
+													</AvatarFallback>
+												</Avatar>
+											</MessageAvatar>
+											<MessageContent>
+												<Bubble
+													align={isOwn ? 'end' : 'start'}
+													variant={isOwn ? 'default' : 'secondary'}
+													className='max-w-[90%] sm:max-w-[80%]'
+												>
+													<BubbleContent>{message.text}</BubbleContent>
+												</Bubble>
+											</MessageContent>
+										</Message>
+									</MessageScrollerItem>
+								)
+							})}
 						</MessageScrollerContent>
 					</MessageScrollerViewport>
 
@@ -91,14 +100,15 @@ export const MessageScrollbar = () => {
 							onKeyDown={keyboardEvent('Enter', handleSendMessage)}
 							className='min-h-12 max-h-32 flex-1 resize-none sm:min-h-16'
 							id='textarea-message'
-							placeholder='Написать сообщение...'
+							placeholder={ready ? 'Написать сообщение...' : 'Подключаемся...'}
 							value={inputValue ?? ''}
 							onChange={(e) => setInputValue(e.target.value)}
+							disabled={!ready}
 						/>
 						<Button
 							size='icon'
 							onClick={handleSendMessage}
-							disabled={!inputValue}
+							disabled={!ready || !inputValue}
 						>
 							<Send className='size-4' />
 							<span className='sr-only'>Отправить</span>
